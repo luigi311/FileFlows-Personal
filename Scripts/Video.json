@@ -109,7 +109,7 @@
         {
           "Input": 1,
           "Output": 2,
-          "InputNode": "c16c4efc-cb70-4c91-a8a9-c5ce2f5e71de"
+          "InputNode": "366b51c2-379f-4335-8e59-0c8bca73c8f4"
         }
       ],
       "Type": 3,
@@ -155,7 +155,7 @@
         {
           "Input": 1,
           "Output": 2,
-          "InputNode": "c16c4efc-cb70-4c91-a8a9-c5ce2f5e71de"
+          "InputNode": "366b51c2-379f-4335-8e59-0c8bca73c8f4"
         },
         {
           "Input": 1,
@@ -173,12 +173,12 @@
       }
     },
     {
-      "Uid": "c16c4efc-cb70-4c91-a8a9-c5ce2f5e71de",
-      "Name": "",
-      "FlowElementUid": "FileFlows.VideoNodes.FfmpegBuilderNodes.FfmpegBuilderStart",
+      "Uid": "366b51c2-379f-4335-8e59-0c8bca73c8f4",
+      "Name": "prepare",
+      "FlowElementUid": "FileFlows.BasicNodes.Functions.Function",
       "xPos": 450,
-      "yPos": 610,
-      "Icon": "far fa-file-video",
+      "yPos": 670,
+      "Icon": "fas fa-code",
       "Label": "",
       "Inputs": 1,
       "Outputs": 1,
@@ -186,19 +186,22 @@
         {
           "Input": 1,
           "Output": 1,
-          "InputNode": "5056da7b-ddff-4a8e-ab2b-2a3d2ce91693"
+          "InputNode": "5cb59d3d-9a09-46a0-bf72-f84b5f8928b2"
         }
       ],
-      "Type": 4,
-      "Model": {}
+      "Type": 3,
+      "Model": {
+        "Outputs": 1,
+        "Code": "let output = Flow.TempPath \u002B \u0027/\u0027 \u002B Flow.NewGuid() \u002B \u0027.mkv\u0027;\nlet ffmpeg = Flow.GetToolPath(\u0027ffmpeg\u0027);\n\nlet arguements = [\n\t\u0027-i\u0027,\n\tVariables.file.FullName,\n\t\u0027-map\u0027,\n\t\u00270\u0027,\n\t\u0027-max_interleave_delta\u0027,\n\t\u00270\u0027,\n\t\u0027-c\u0027,\n\t\u0027copy\u0027,\n\t\u0027-c:v\u0027,\n\t\u0027libx264\u0027,\n\t\u0027-crf\u0027,\n\t\u00270\u0027,\n\t\u0027-preset\u0027,\n\t\u0027ultrafast\u0027,\n\toutput\n];\n\nlet process = Flow.Execute({\n\tcommand: ffmpeg,\n\targumentList: arguements\n});\n\nif(process.starndardError)\n\tLogger.ILog(\u0027Standard error: \u0027 \u002B process.starndardError);\n\nif(process.exitCode !== 0){\n\tLogger.ELog(\u0027Failed processing ffmpeg: \u0027 \u002B process.exitCode);\n\treturn -1;\n}\n\nFlow.SetWorkingFile(output);\nreturn 1;"
+      }
     },
     {
-      "Uid": "aaac4090-57d9-4b20-83f8-74d09fe2f1a4",
+      "Uid": "5cb59d3d-9a09-46a0-bf72-f84b5f8928b2",
       "Name": "",
-      "FlowElementUid": "FileFlows.VideoNodes.FfmpegBuilderNodes.FfmpegBuilderExecutor",
+      "FlowElementUid": "FileFlows.VideoNodes.ReadVideoInfo",
       "xPos": 450,
-      "yPos": 820,
-      "Icon": "far fa-file-video",
+      "yPos": 790,
+      "Icon": "fas fa-video",
       "Label": "",
       "Inputs": 1,
       "Outputs": 2,
@@ -207,45 +210,15 @@
           "Input": 1,
           "Output": 1,
           "InputNode": "ceb9ee60-8534-4522-a05f-58bf6085d51d"
-        },
-        {
-          "Input": 1,
-          "Output": 2,
-          "InputNode": "ceb9ee60-8534-4522-a05f-58bf6085d51d"
         }
       ],
-      "Type": 5,
-      "Model": {
-        "HardwareDecoding": true
-      }
-    },
-    {
-      "Uid": "5056da7b-ddff-4a8e-ab2b-2a3d2ce91693",
-      "Name": "prepare",
-      "FlowElementUid": "FileFlows.VideoNodes.FfmpegBuilderNodes.FfmpegBuilderCustomParameters",
-      "xPos": 450,
-      "yPos": 730,
-      "Icon": "fas fa-plus-square",
-      "Label": "",
-      "Inputs": 1,
-      "Outputs": 1,
-      "OutputConnections": [
-        {
-          "Input": 1,
-          "Output": 1,
-          "InputNode": "aaac4090-57d9-4b20-83f8-74d09fe2f1a4"
-        }
-      ],
-      "Type": 6,
-      "Model": {
-        "Parameters": "-max_interleave_delta 0 -c copy -c:v libx264 -crf 0 -preset ultrafast ",
-        "ForceEncode": true
-      }
+      "Type": 3,
+      "Model": {}
     }
   ],
   "Default": false,
   "Uid": "e8797247-b170-451c-9071-ae875b794f69",
   "Name": "Video",
   "DateCreated": "2022-08-18T01:27:16.5600968-06:00",
-  "DateModified": "2022-08-18T01:57:49.0954967-06:00"
+  "DateModified": "2022-08-18T04:43:50.9379151-06:00"
 }
