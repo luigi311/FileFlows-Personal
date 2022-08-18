@@ -1,0 +1,66 @@
+FROM archlinux:base-devel AS base
+
+ENV BUILD_USER=makepkg
+ENV PATH=$PATH:/root/.dotnet/tools:/opt/cuda/bin
+
+RUN sed -i 's/#MAKEFLAGS="-j2"/MAKEFLAGS="-j$(nproc)"/' /etc/makepkg.conf
+RUN pacman-key --init && pacman -Sy --noconfirm archlinux-keyring && pacman -Syu --noconfirm wget dos2unix git libva-intel-driver libva-vdpau-driver libva-utils intel-media-driver libva-intel-driver openssl dotnet-runtime aspnet-runtime
+
+RUN useradd --system --create-home $BUILD_USER \
+  && echo "$BUILD_USER ALL=(ALL:ALL) NOPASSWD:/usr/sbin/pacman" > /etc/sudoers.d/$BUILD_USER
+
+USER $BUILD_USER
+WORKDIR /home/$BUILD_USER
+
+# Install yay
+RUN git clone https://aur.archlinux.org/yay.git \
+  && cd yay \
+  && makepkg -sri --needed --noconfirm \
+  && cd \
+  && rm -rf .cache yay
+
+RUN yes | yay -Sy --noconfirm lensfun-git && \
+    yes | yay -Sy --noconfirm comskip ffmpeg-full && \
+    yes | yay -Scc
+
+USER root
+
+############################################################# 
+#### Prepare the docker with ffmpeg and hardware encoders ###
+#############################################################
+
+ENV LIBVA_DRIVERS_PATH="/usr/lib/x86_64-linux-gnu/dri" \
+    LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu" \
+    NVIDIA_DRIVER_CAPABILITIES="compute,video,utility" \
+    NVIDIA_VISIBLE_DEVICES="all" \
+    DOTNET_CLI_TELEMETRY_OPTOUT=true
+
+# Av1an Dependencies
+RUN pacman -Sy --noconfirm aom vapoursynth ffms2 libvpx mkvtoolnix-cli svt-av1 vapoursynth-plugin-lsmashsource vmaf unzip
+
+COPY --from=masterofzen/av1an:master /usr/local/bin/rav1e /usr/local/bin/rav1e
+COPY --from=masterofzen/av1an:master /usr/local/bin/av1an /usr/local/bin/av1an
+
+##########################################
+### actual FileFlows stuff happens now ###
+##########################################
+
+# copy the deploy file into the app directory
+RUN wget -O FileFlows.zip https://fileflows.com/downloads/zip && \
+    unzip FileFlows.zip && \
+    rm FileFlows.zip && \
+    mkdir /app && \
+    mv * /app
+
+# set the working directory
+WORKDIR /app
+
+COPY ./docker-entrypoint.sh /app/
+
+RUN dos2unix /app/docker-entrypoint.sh && \
+    chmod +x /app/docker-entrypoint.sh
+
+# expose the ports we need
+EXPOSE 5000
+
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
