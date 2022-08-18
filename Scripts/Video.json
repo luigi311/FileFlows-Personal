@@ -1,0 +1,251 @@
+{
+  "Enabled": true,
+  "Description": "A blank Video template with a single \u0022Video File\u0022 input node.",
+  "Type": 0,
+  "Template": "Blank Video Template",
+  "Parts": [
+    {
+      "Uid": "0e3eb370-3bcc-4799-9f33-c9132c149caa",
+      "Name": "",
+      "FlowElementUid": "FileFlows.VideoNodes.VideoFile",
+      "xPos": 420,
+      "yPos": 60,
+      "Icon": "fas fa-video",
+      "Label": "",
+      "Inputs": 0,
+      "Outputs": 1,
+      "OutputConnections": [
+        {
+          "Input": 1,
+          "Output": 1,
+          "InputNode": "20258b0a-4629-4d21-bf96-e4ee9c0014be"
+        }
+      ],
+      "Type": 0,
+      "Model": null
+    },
+    {
+      "Uid": "8f640c36-b859-4411-aa93-f9ad5f971e7b",
+      "Name": "Already x265",
+      "FlowElementUid": "FileFlows.BasicNodes.Functions.Log",
+      "xPos": 120,
+      "yPos": 390,
+      "Icon": "far fa-file-alt",
+      "Label": "",
+      "Inputs": 1,
+      "Outputs": 1,
+      "OutputConnections": [
+        {
+          "Input": 1,
+          "Output": 1,
+          "InputNode": "1708e52c-f5f7-4956-bdb9-9ee98513d22d"
+        }
+      ],
+      "Type": 3,
+      "Model": {
+        "LogType": 0,
+        "Message": "Already x265 so probably already encoded"
+      }
+    },
+    {
+      "Uid": "ceb9ee60-8534-4522-a05f-58bf6085d51d",
+      "Name": "av1an",
+      "FlowElementUid": "FileFlows.BasicNodes.Functions.Function",
+      "xPos": 450,
+      "yPos": 940,
+      "Icon": "fas fa-code",
+      "Label": "",
+      "Inputs": 1,
+      "Outputs": 1,
+      "OutputConnections": [
+        {
+          "Input": 1,
+          "Output": 1,
+          "InputNode": "0eae90d4-ee87-4ab6-b320-b421995d91ce"
+        }
+      ],
+      "Type": 3,
+      "Model": {
+        "Outputs": 1,
+        "Code": "let encoder = \u0027x265\u0027\nlet encoding_parameters = \u0027-p slower --crf 25 -D 10 -F 1 --no-sao --no-strong-intra-smoothing --bframes 8 --psy-rd 2 --psy-rdoq 1 --aq-mode 3 --ref 6 --deblock -1,-1\u0027\nlet target_quality = \u002797\u0027\n\nlet base_folder = Flow.TempPath \u002B \u0027/\u0027 \u002B Flow.NewGuid()\nlet temp_folder = base_folder \u002B \u0027/\u0027 \u002B Variables.file.Orig.FileName.replace(/[^a-z0-9]/gi, \u0027_\u0027).toLowerCase();\nlet output = base_folder \u002B \u0027.mkv\u0027;\nlet av1an = Flow.GetToolPath(\u0027av1an\u0027);\nlet process = Flow.Execute({\n\tcommand: av1an,\n\targumentList: [\n\t\t\u0027-i\u0027,\n\t\tVariables.file.FullName,\n\t\t\u0027-y\u0027,\n\t\t\u0027-e\u0027,\n\t\tencoder,\n\t\t\u0027-v\u0027,\n\t\tencoding_parameters,\n        \u0027--probe-slow\u0027,\n\t\t\u0027--chunk-method\u0027,\n\t\t\u0027lsmash\u0027,\n\t\t\u0027--target-quality\u0027,\n\t\ttarget_quality,\n\t\t\u0027--concat\u0027,\n\t\t\u0027mkvmerge\u0027,\n\t\t\u0027--vmaf\u0027,\n\t\t\u0027--vmaf-threads\u0027,\n        \u00278\u0027,\n\t\t\u0027--temp\u0027,\n\t\ttemp_folder ,\n\t\t\u0027-o\u0027,\n\t\t\u0060${output}\u0060\n\t]\n});\n\nif(process.standardOutput)\n\tLogger.ILog(\u0027Standard output: \u0027 \u002B process.standardOutput);\nif(process.starndardError)\n\tLogger.ILog(\u0027Standard error: \u0027 \u002B process.starndardError);\n\nif(process.exitCode !== 0){\n\tLogger.ELog(\u0027Failed processing av1an: \u0027 \u002B process.exitCode);\n\treturn -1;\n}\n\nFlow.SetWorkingFile(output);\nreturn 1;"
+      }
+    },
+    {
+      "Uid": "0eae90d4-ee87-4ab6-b320-b421995d91ce",
+      "Name": "Audio Processing",
+      "FlowElementUid": "FileFlows.BasicNodes.Functions.GotoFlow",
+      "xPos": 450,
+      "yPos": 1160,
+      "Icon": "fas fa-sitemap",
+      "Label": "",
+      "Inputs": 1,
+      "Outputs": 0,
+      "OutputConnections": null,
+      "Type": 3,
+      "Model": {
+        "Flow": {
+          "name": "Audio Processing Remux",
+          "uid": "2f002c50-48f0-4d8c-9bb9-73e988f55b07",
+          "type": "FileFlows.Shared.Models.Flow"
+        }
+      }
+    },
+    {
+      "Uid": "1708e52c-f5f7-4956-bdb9-9ee98513d22d",
+      "Name": "0 \u003C X \u003C 10GB",
+      "FlowElementUid": "FileFlows.BasicNodes.File.FileSize",
+      "xPos": 120,
+      "yPos": 490,
+      "Icon": "fas fa-balance-scale-right",
+      "Label": "",
+      "Inputs": 1,
+      "Outputs": 2,
+      "OutputConnections": [
+        {
+          "Input": 1,
+          "Output": 1,
+          "InputNode": "afc9eb9f-0e30-4b7b-950e-844d029d06c5"
+        },
+        {
+          "Input": 1,
+          "Output": 2,
+          "InputNode": "c16c4efc-cb70-4c91-a8a9-c5ce2f5e71de"
+        }
+      ],
+      "Type": 3,
+      "Model": {
+        "Lower": 0,
+        "Upper": 10240
+      }
+    },
+    {
+      "Uid": "afc9eb9f-0e30-4b7b-950e-844d029d06c5",
+      "Name": "Smaller than 10 GB",
+      "FlowElementUid": "FileFlows.BasicNodes.Functions.Log",
+      "xPos": 90,
+      "yPos": 940,
+      "Icon": "far fa-file-alt",
+      "Label": "",
+      "Inputs": 1,
+      "Outputs": 1,
+      "OutputConnections": [
+        {
+          "Input": 1,
+          "Output": 1,
+          "InputNode": "0eae90d4-ee87-4ab6-b320-b421995d91ce"
+        }
+      ],
+      "Type": 3,
+      "Model": {
+        "LogType": 2,
+        "Message": "Smaller than 10, Probably not a hevc remux"
+      }
+    },
+    {
+      "Uid": "20258b0a-4629-4d21-bf96-e4ee9c0014be",
+      "Name": "Has x265",
+      "FlowElementUid": "FileFlows.VideoNodes.VideoHasStream",
+      "xPos": 420,
+      "yPos": 250,
+      "Icon": "fas fa-video",
+      "Label": "",
+      "Inputs": 1,
+      "Outputs": 2,
+      "OutputConnections": [
+        {
+          "Input": 1,
+          "Output": 2,
+          "InputNode": "c16c4efc-cb70-4c91-a8a9-c5ce2f5e71de"
+        },
+        {
+          "Input": 1,
+          "Output": 1,
+          "InputNode": "8f640c36-b859-4411-aa93-f9ad5f971e7b"
+        }
+      ],
+      "Type": 3,
+      "Model": {
+        "Stream": "Video",
+        "Title": null,
+        "Codec": "h265|hevc",
+        "Language": null,
+        "Channels": 0
+      }
+    },
+    {
+      "Uid": "c16c4efc-cb70-4c91-a8a9-c5ce2f5e71de",
+      "Name": "",
+      "FlowElementUid": "FileFlows.VideoNodes.FfmpegBuilderNodes.FfmpegBuilderStart",
+      "xPos": 450,
+      "yPos": 610,
+      "Icon": "far fa-file-video",
+      "Label": "",
+      "Inputs": 1,
+      "Outputs": 1,
+      "OutputConnections": [
+        {
+          "Input": 1,
+          "Output": 1,
+          "InputNode": "5056da7b-ddff-4a8e-ab2b-2a3d2ce91693"
+        }
+      ],
+      "Type": 4,
+      "Model": {}
+    },
+    {
+      "Uid": "aaac4090-57d9-4b20-83f8-74d09fe2f1a4",
+      "Name": "",
+      "FlowElementUid": "FileFlows.VideoNodes.FfmpegBuilderNodes.FfmpegBuilderExecutor",
+      "xPos": 450,
+      "yPos": 820,
+      "Icon": "far fa-file-video",
+      "Label": "",
+      "Inputs": 1,
+      "Outputs": 2,
+      "OutputConnections": [
+        {
+          "Input": 1,
+          "Output": 1,
+          "InputNode": "ceb9ee60-8534-4522-a05f-58bf6085d51d"
+        },
+        {
+          "Input": 1,
+          "Output": 2,
+          "InputNode": "ceb9ee60-8534-4522-a05f-58bf6085d51d"
+        }
+      ],
+      "Type": 5,
+      "Model": {
+        "HardwareDecoding": true
+      }
+    },
+    {
+      "Uid": "5056da7b-ddff-4a8e-ab2b-2a3d2ce91693",
+      "Name": "prepare",
+      "FlowElementUid": "FileFlows.VideoNodes.FfmpegBuilderNodes.FfmpegBuilderCustomParameters",
+      "xPos": 450,
+      "yPos": 730,
+      "Icon": "fas fa-plus-square",
+      "Label": "",
+      "Inputs": 1,
+      "Outputs": 1,
+      "OutputConnections": [
+        {
+          "Input": 1,
+          "Output": 1,
+          "InputNode": "aaac4090-57d9-4b20-83f8-74d09fe2f1a4"
+        }
+      ],
+      "Type": 6,
+      "Model": {
+        "Parameters": "-max_interleave_delta 0 -c copy -c:v libx264 -crf 0 -preset ultrafast ",
+        "ForceEncode": true
+      }
+    }
+  ],
+  "Default": false,
+  "Uid": "e8797247-b170-451c-9071-ae875b794f69",
+  "Name": "Video",
+  "DateCreated": "2022-08-18T01:27:16.5600968-06:00",
+  "DateModified": "2022-08-18T01:57:49.0954967-06:00"
+}
