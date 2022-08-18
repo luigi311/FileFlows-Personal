@@ -52,9 +52,9 @@ jobs:
         if: steps.docker_meta.outcome == 'skipped'
         uses: docker/build-push-action@v2
         with:
-          context: .
+          context: Docker
           platforms: linux/amd64
-          file: ./Dockerfile.non-free
+          file: Docker/Dockerfile.non-free
           push: false
           tags: fileflows:action
           cache-from: type=local,src=/tmp/.buildx-cache
@@ -65,9 +65,9 @@ jobs:
         if: steps.docker_meta.outcome == 'success'
         uses: docker/build-push-action@v2
         with:
-          context: .
+          context: Docker
           platforms: linux/amd64
-          file: ./Dockerfile.non-free
+          file: Docker/Dockerfile.non-free
           push: true
           tags: ${{ steps.docker_meta.outputs.tags }}
           labels: ${{ steps.docker_meta.outputs.labels }}
