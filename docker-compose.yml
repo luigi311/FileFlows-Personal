@@ -1,0 +1,30 @@
+version: '3.1'
+
+services:
+  fileflownodes:
+    image: docker.luigi311.com/luigi311/fileflows:latest
+    container_name: node
+    command: --node
+    restart: always
+    pull_policy: always
+    environment:
+      TempPath: /temp
+      NodeName: 
+      ServerUrl: 
+      TimeZone: 
+    volumes:
+      - media:/media
+      - mediaTemp:/temp
+    network_mode: "host"
+
+volumes:
+  media:
+    driver_opts:
+      type: cifs
+      o: username=,password=,uid=99,gid=1000
+      device: //IP/Media
+  mediaTemp:
+    driver_opts:
+      type: cifs
+      o: username=,password=,uid=99,gid=1000
+      device: //IP/Media/FileFlowsTemp
