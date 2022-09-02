@@ -3,6 +3,9 @@ on:
   push:
     paths:
       - 'Docker/**'
+      
+  schedule:
+    - cron: '0 0 * * 0'
 
 jobs:
   docker:
@@ -26,6 +29,7 @@ jobs:
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=sha
+            type=schedule,pattern={{date 'YYYYMMDD'}}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -48,6 +52,10 @@ jobs:
           key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-buildx-
+      
+      - name: Clear cache on scheduled run
+        if: ${{ github.event_name == 'schedule' }}
+        run: rm -rf /tmp/.buildx-cache
       
       - name: Build
         if: steps.docker_meta.outcome == 'skipped'
