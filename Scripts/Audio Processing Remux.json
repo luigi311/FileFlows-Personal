@@ -9,7 +9,7 @@
       "Name": "",
       "FlowElementUid": "FileFlows.VideoNodes.VideoFile",
       "xPos": 450,
-      "yPos": 40,
+      "yPos": 30,
       "Icon": "fas fa-video",
       "Label": "",
       "Inputs": 0,
@@ -29,7 +29,7 @@
       "Name": "Audio Compress",
       "FlowElementUid": "FileFlows.BasicNodes.Functions.Function",
       "xPos": 450,
-      "yPos": 1380,
+      "yPos": 1410,
       "Icon": "fas fa-code",
       "Label": "",
       "Inputs": 1,
@@ -43,13 +43,13 @@
         {
           "Input": 1,
           "Output": 2,
-          "InputNode": "a4d820ee-55c4-4e40-a612-a63c3c62c50a"
+          "InputNode": "e986f6cf-f4ef-46ef-b7c4-cae744b3a8fe"
         }
       ],
       "Type": 3,
       "Model": {
         "Outputs": 2,
-        "Code": "let audio_encode_codec = \u0027libfdk_aac\u0027;\r\nlet audio_encode_options = [\u0027-vbr\u0027, \u00275\u0027];\r\nlet audio_encode_list = new Array(\u0027truehd\u0027, \u0027flac\u0027, \u0027dts\u0027);\r\n\r\nlet audio_codec_list = new Array();\r\nif(Variables.vi?.Audio?.Codecs) {\r\n\taudio_codec_list = Variables.vi?.Audio?.Codecs.toString();\r\n\taudio_codec_list = audio_codec_list.split(\u0022,\u0022);\r\n}\r\n\r\nlet encode = false;\r\nlet i = 0;\r\n\r\nfor (i=0; i\u003Caudio_encode_list.length; i\u002B\u002B) {\r\n\tif (audio_codec_list.includes(audio_encode_list[i])) {\r\n\t\tencode = true;\r\n\t\tbreak;\r\n\t}\r\n}\r\n\r\nif (encode) {\r\n\tlet audio_streams = Variables.vi?.VideoInfo?.AudioStreams;\r\n\tlet audio_filter = [\u0027-c:a\u0027, \u0027copy\u0027];\r\n\tlet audio_map_index = 0;\r\n\r\n\tfor (i=0; i\u003Caudio_streams.length; i\u002B\u002B) {\r\n\t\tif (audio_encode_list.includes(audio_streams[i].Codec)) {\r\n            audio_filter.push(\u0027-map\u0027, audio_streams[i][\u0027IndexString\u0027], \u0060-c:a:${audio_map_index}\u0060, audio_encode_codec, ...audio_encode_options);\r\n\t\t\taudio_map_index \u002B= 1;\r\n\t\t}\r\n\t}\r\n\r\n\tlet output = Flow.TempPath \u002B \u0027/\u0027 \u002B Flow.NewGuid() \u002B \u0027.mkv\u0027;\r\n\tlet ffmpeg = Flow.GetToolPath(\u0027ffmpeg\u0027);\r\n\r\n\tlet arguments = [\r\n\t\t\t\u0027-i\u0027,\r\n\t\t\tVariables.file.FullName,\r\n\t\t\t\u0027-map\u0027,\r\n\t\t\t\u0027V\u0027,\r\n\t\t\t\u0027-c\u0027,\r\n\t\t\t\u0027copy\u0027,\r\n\t\t\t\u0027-ar\u0027,\r\n\t\t\t\u002748000\u0027,\r\n\t\t];\r\n\r\n    arguments.push(...audio_filter);\r\n\targuments.push(\u0027-map\u0027, \u00270:s?\u0027, \u0027-map\u0027, \u00270:t?\u0027, \u0027-max_interleave_delta\u0027, \u00270\u0027)\r\n\r\n\targuments.push(output);\r\n\r\n\tlet process = Flow.Execute({\r\n\t\tcommand: ffmpeg,\r\n\t\targumentList: arguments\r\n\t});\r\n\r\n\tif(process.starndardError)\r\n\t\tLogger.ILog(\u0027Standard error: \u0027 \u002B process.starndardError);\r\n\r\n\tif(process.exitCode !== 0){\r\n\t\tLogger.ELog(\u0027Failed processing ffmpeg: \u0027 \u002B process.exitCode);\r\n\t\treturn -1;\r\n\t}\r\n\r\n\tFlow.SetWorkingFile(output);\r\n\treturn 1;\r\n\r\n} else {\r\n\tLogger.ILog(\u0027No need to encode\u0027);\r\n\treturn 2;\r\n}"
+        "Code": "let audio_encode_codec = \u0027libfdk_aac\u0027;\r\nlet audio_encode_options = [\u0027-vbr\u0027, \u00275\u0027];\r\nlet audio_encode_list = new Array(\u0027truehd\u0027, \u0027flac\u0027, \u0027dts\u0027);\r\n\r\nlet audio_codec_list = new Array();\r\nif(Variables.vi?.Audio?.Codecs) {\r\n\taudio_codec_list = Variables.vi?.Audio?.Codecs.toString();\r\n\taudio_codec_list = audio_codec_list.split(\u0022,\u0022);\r\n\taudio_codec_list = audio_codec_list.map(str =\u003E str.trim());\r\n\r\n}\r\n\r\nlet encode = false;\r\nlet i = 0;\r\n\r\nencode = audio_encode_list.some(codec =\u003E audio_codec_list.includes(codec));\r\n\r\nif (encode) {\r\n\tlet audio_streams = Variables.vi?.VideoInfo?.AudioStreams;\r\n\tlet audio_filter = [\u0027-c:a\u0027, \u0027copy\u0027];\r\n\tlet audio_map_index = 0;\r\n\tlet languages=new Array();\r\n\tlet notEncoded = []\r\n\r\n\tfor (i=0; i\u003Caudio_streams.length; i\u002B\u002B) {\r\n\t\tif (audio_encode_list.includes(audio_streams[i].Codec)) {\r\n            audio_filter.push(\u0027-map\u0027, audio_streams[i][\u0027IndexString\u0027], \u0060-c:a:${audio_map_index}\u0060, audio_encode_codec, ...audio_encode_options);\r\n\t\t\taudio_map_index \u002B= 1;\r\n\t\t\tlanguages.push(audio_streams[i].Language)\r\n\t\t} else {\r\n\t\t\tnotEncoded.push(i)\r\n\t\t}\r\n\t}\r\n\r\n\tfor(let i of notEncoded) {\r\n\t\tlet language = audio_streams[i].Language\r\n\t\tif(!languages.includes(language)) {\r\n\t\t\taudio_filter.push(\u0027-map\u0027, audio_streams[i][\u0027IndexString\u0027], \u0060-c:a:${audio_map_index}\u0060, \u0027copy\u0027)\r\n\t\t\taudio_map_index \u002B= 1;\r\n\t\t\tlanguages.push(language)\r\n\t\t}\r\n\t}\r\n\r\n\tlet output = Flow.TempPath \u002B \u0027/\u0027 \u002B Flow.NewGuid() \u002B \u0027.mkv\u0027;\r\n\tlet ffmpeg = Flow.GetToolPath(\u0027ffmpeg\u0027);\r\n\r\n\tlet arguments = [\r\n\t\t\t\u0027-i\u0027,\r\n\t\t\tVariables.file.FullName,\r\n\t\t\t\u0027-map\u0027,\r\n\t\t\t\u0027V\u0027,\r\n\t\t\t\u0027-c\u0027,\r\n\t\t\t\u0027copy\u0027,\r\n\t\t\t\u0027-ar\u0027,\r\n\t\t\t\u002748000\u0027,\r\n\t\t];\r\n\r\n    arguments.push(...audio_filter);\r\n\targuments.push(\u0027-map\u0027, \u00270:s?\u0027, \u0027-map\u0027, \u00270:t?\u0027, \u0027-max_interleave_delta\u0027, \u00270\u0027)\r\n\r\n\targuments.push(output);\r\n\r\n\tlet process = Flow.Execute({\r\n\t\tcommand: ffmpeg,\r\n\t\targumentList: arguments\r\n\t});\r\n\r\n\tif(process.starndardError)\r\n\t\tLogger.ILog(\u0027Standard error: \u0027 \u002B process.starndardError);\r\n\r\n\tif(process.exitCode !== 0){\r\n\t\tLogger.ELog(\u0027Failed processing ffmpeg: \u0027 \u002B process.exitCode);\r\n\t\treturn -1;\r\n\t}\r\n\r\n\tFlow.SetWorkingFile(output);\r\n\treturn 1;\r\n\r\n} else {\r\n\tLogger.ILog(\u0027No need to encode\u0027);\r\n\treturn 2;\r\n}"
       }
     },
     {
@@ -79,8 +79,8 @@
       "Uid": "a4d820ee-55c4-4e40-a612-a63c3c62c50a",
       "Name": "",
       "FlowElementUid": "FileFlows.VideoNodes.ReadVideoInfo",
-      "xPos": 450,
-      "yPos": 1510,
+      "xPos": 350,
+      "yPos": 1530,
       "Icon": "fas fa-video",
       "Label": "",
       "Inputs": 1,
@@ -100,7 +100,7 @@
       "Name": "DRC",
       "FlowElementUid": "FileFlows.BasicNodes.Functions.Function",
       "xPos": 450,
-      "yPos": 470,
+      "yPos": 540,
       "Icon": "fas fa-code",
       "Label": "",
       "Inputs": 1,
@@ -114,41 +114,21 @@
         {
           "Input": 1,
           "Output": 2,
-          "InputNode": "a1e87fe1-6a78-4cbc-ab12-7d42f4bbaaae"
+          "InputNode": "40b43ea6-d766-45e3-8e30-99fc21f3180e"
         }
       ],
       "Type": 3,
       "Model": {
         "Outputs": 2,
-        "Code": "let audio_encode_list = new Array(\u0027truehd\u0027, \u0027flac\u0027);\nlet audio_encode_codec = \u0027flac\u0027;\nlet audio_drc_ratio = \u00274\u0027;\n\n\nlet audio_codec_list = new Array();\nif(Variables.vi?.Audio?.Codecs) {\n\taudio_codec_list = Variables.vi?.Audio?.Codecs.toString();\n\taudio_codec_list = audio_codec_list.split(\u0022,\u0022);\n}\n\nlet encode_codec = false;\nlet encode_multichannel = false;\nlet i = 0;\n\nfor (i=0; i\u003Caudio_encode_list.length; i\u002B\u002B) {\n\tif (audio_codec_list.includes(audio_encode_list[i])) {\n\t\tencode_codec = true;\n\t}\n}\n\nif (encode_codec) {\n\tlet audio_streams = Variables.vi?.VideoInfo?.AudioStreams;\n\tlet audio_stream;\n\tlet audio_indexes = [];\n\t\n\tfor (i=0; i\u003Caudio_streams.length; i\u002B\u002B) {\n\t\taudio_stream = audio_streams[i];\n\t\t\n\t\tif (audio_encode_list.includes(audio_stream[\u0027Codec\u0027])) {\n\t\t\taudio_indexes.push(i)\n\t\t}\n\t}\n\n\tlet multichannel = [];\n\tfor (i=0; i\u003Caudio_indexes.length; i\u002B\u002B) {\n\t\tlet channels = parseInt(audio_streams[audio_indexes[i]][\u0027Channels\u0027].toString().charAt(0))\n\t\tif ( channels \u003E 2 ) {\n\t\t\tmultichannel.push(audio_indexes[i])\n\t\t\tencode_multichannel = true;\n\t\t}\n\t}\n\n\tif(encode_multichannel) {\n\t\tlet audio_filter = [];\n\t\taudio_filter.push(\u0027-c:a\u0027, audio_encode_codec)\n\t\t\n\t\t// Needs to be -1 so it can be incremented by 2 for every track\n\t\tlet audio_filter_index = -1\n\t\tlet multichannel_lang = [];\n\n\t\tif (multichannel.length \u003E 0) {\n\t\t\tfor (i=0; i\u003Cmultichannel.length; i\u002B\u002B) {\n\t\t\t\taudio_filter_index \u002B= 2;\n\t\t\t\taudio_stream = audio_streams[multichannel[i]]\n\t\t\t\tchannels_title = audio_stream[\u0027Channels\u0027].toFixed(1)\n\t\t\t\t// Keep multi channel version and stereo with drc version\n\t\t\t\taudio_filter.push(\u0027-map\u0027, audio_stream[\u0027IndexString\u0027], \u0060-ac:a:${audio_filter_index-1}\u0060, \u00270\u0027 , \u0060-metadata:s:a:${audio_filter_index-1}\u0060, \u0060title=${channels_title} Surround ${audio_stream[\u0027Language\u0027]}\u0060, \u0027-map\u0027, audio_stream[\u0027IndexString\u0027], \u0060-ac:a:${audio_filter_index}\u0060, 2, \u0060-filter:a:${audio_filter_index}\u0060, \u0060acompressor=ratio=${audio_drc_ratio}\u0060, \u0060-metadata:s:a:${audio_filter_index}\u0060, \u0060title=Stereo DRC ${audio_stream[\u0027Language\u0027]}\u0060)\n\t\t\t\tmultichannel_lang.push(audio_stream[\u0027Language\u0027])\n\t\t\t}\n\t\t} \n\t\t\n\t\t// Get audio lang of multichannel tracks. If audio_index lang in multichannel tracks then ignore else copy.\n\t\t\n\t\tfor (i=0; i\u003Caudio_indexes.length; i\u002B\u002B) {\n\t\t\taudio_stream = audio_streams[audio_indexes[i]]\n\n\t\t\tif (!(multichannel_lang.includes(audio_stream[\u0027Language\u0027]))) {\n\t\t\t\taudio_filter_index \u002B= 1;\n\t\t\t\taudio_filter.push(\u0027-map\u0027, audio_streams[audio_indexes[i]][\u0027IndexString\u0027], \u0060-metadata:s:a:${audio_filter_index}\u0060, \u0060title=Stereo ${audio_stream[\u0027Language\u0027]}\u0060)\n\t\t\t}\n\t\t}\n\t\t\n\t\tLogger.ILog(audio_filter)\n\t\tlet output = Flow.TempPath \u002B \u0027/\u0027 \u002B Flow.NewGuid() \u002B \u0027.mkv\u0027;\n\t\tlet ffmpeg = Flow.GetToolPath(\u0027ffmpeg\u0027);\n\t\t\n\t\tlet arguments = [\n\t\t\t\t\u0027-i\u0027,\n\t\t\t\tVariables.file.FullName,\n\t\t\t\t\u0027-map\u0027,\n\t\t\t\t\u0027V\u0027,\n\t\t\t\t\u0027-c\u0027,\n\t\t\t\t\u0027copy\u0027,\n\t\t\t];\n        \n        arguments.push(...audio_filter);\n\t\targuments.push(\u0027-map\u0027, \u00270:s?\u0027, \u0027-map\u0027, \u00270:t?\u0027, \u0027-max_interleave_delta\u0027, \u00270\u0027)\n\t\targuments.push(output);\n\n\t\tLogger.ILog(arguments)\n\n\t\tlet process = Flow.Execute({\n\t\t\tcommand: ffmpeg,\n\t\t\targumentList: arguments\n\t\t});\n\n\t\tif(process.starndardError)\n\t\t\tLogger.ILog(\u0027Standard error: \u0027 \u002B process.starndardError);\n\n\t\tif(process.exitCode !== 0){\n\t\t\tLogger.ELog(\u0027Failed processing ffmpeg: \u0027 \u002B process.exitCode);\n\t\t\treturn -1;\n\t\t}\n\n\t\tFlow.SetWorkingFile(output);\n\t} else {\n\t\tLogger.ILog(\u0027No need to DRC\u0027)\n\t\treturn 2\n\t}\n} else {\n\tLogger.ILog(\u0027No need to DRC\u0027)\n\treturn 2\n}\n\nreturn 1"
+        "Code": "let audio_encode_list = new Array(\u0027truehd\u0027, \u0027flac\u0027, \u0027pcm_s16le\u0027);\nlet audio_encode_codec = \u0027flac\u0027;\nlet audio_drc_ratio = \u00274\u0027;\n\n\nlet audio_codec_list = new Array();\nif(Variables.vi?.Audio?.Codecs) {\n\taudio_codec_list = Variables.vi?.Audio?.Codecs.toString();\n\taudio_codec_list = audio_codec_list.split(\u0022,\u0022);\n\taudio_codec_list = audio_codec_list.map(str =\u003E str.trim());\n\n}\n\nlet encode = false;\nlet encode_multichannel = false;\nlet i = 0;\n\nencode = audio_encode_list.some(codec =\u003E audio_codec_list.includes(codec));\n\n\nif (encode) {\n\tlet audio_streams = Variables.vi?.VideoInfo?.AudioStreams;\n\tlet audio_stream;\n\tlet audio_indexes = [];\n\t\n\tfor (i=0; i\u003Caudio_streams.length; i\u002B\u002B) {\n\t\taudio_stream = audio_streams[i];\n\t\t\n\t\tif (audio_encode_list.includes(audio_stream[\u0027Codec\u0027])) {\n\t\t\taudio_indexes.push(i)\n\t\t}\n\t}\n\n\tlet multichannel = [];\n\tfor (i=0; i\u003Caudio_indexes.length; i\u002B\u002B) {\n\t\tlet channels = parseInt(audio_streams[audio_indexes[i]][\u0027Channels\u0027].toString().charAt(0))\n\t\tif ( channels \u003E 2 ) {\n\t\t\tmultichannel.push(audio_indexes[i])\n\t\t\tencode_multichannel = true;\n\t\t}\n\t}\n\n\tif(encode_multichannel) {\n\t\tlet audio_filter = [];\n\t\taudio_filter.push(\u0027-c:a\u0027, audio_encode_codec)\n\t\t\n\t\t// Needs to be -1 so it can be incremented by 2 for every track\n\t\tlet audio_filter_index = -1\n\t\tlet multichannel_lang = [];\n\n\t\tif (multichannel.length \u003E 0) {\n\t\t\tfor (i=0; i\u003Cmultichannel.length; i\u002B\u002B) {\n\t\t\t\taudio_filter_index \u002B= 2;\n\t\t\t\taudio_stream = audio_streams[multichannel[i]]\n\t\t\t\tchannels_title = audio_stream[\u0027Channels\u0027].toFixed(1)\n\t\t\t\t// Keep multi channel version and stereo with drc version\n\t\t\t\taudio_filter.push(\u0027-map\u0027, audio_stream[\u0027IndexString\u0027], \u0060-ac:a:${audio_filter_index-1}\u0060, \u00270\u0027 , \u0060-metadata:s:a:${audio_filter_index-1}\u0060, \u0060title=${channels_title} Surround ${audio_stream[\u0027Language\u0027]}\u0060, \u0027-map\u0027, audio_stream[\u0027IndexString\u0027], \u0060-ac:a:${audio_filter_index}\u0060, 2, \u0060-filter:a:${audio_filter_index}\u0060, \u0060acompressor=ratio=${audio_drc_ratio}\u0060, \u0060-metadata:s:a:${audio_filter_index}\u0060, \u0060title=Stereo DRC ${audio_stream[\u0027Language\u0027]}\u0060)\n\t\t\t\tmultichannel_lang.push(audio_stream[\u0027Language\u0027])\n\t\t\t}\n\t\t} \n\t\t\n\t\t// Get audio lang of multichannel tracks. If audio_index lang in multichannel tracks then ignore else copy.\n\t\t\n\t\tfor (i=0; i\u003Caudio_indexes.length; i\u002B\u002B) {\n\t\t\taudio_stream = audio_streams[audio_indexes[i]]\n\n\t\t\tif (!(multichannel_lang.includes(audio_stream[\u0027Language\u0027]))) {\n\t\t\t\taudio_filter_index \u002B= 1;\n\t\t\t\taudio_filter.push(\u0027-map\u0027, audio_streams[audio_indexes[i]][\u0027IndexString\u0027], \u0060-metadata:s:a:${audio_filter_index}\u0060, \u0060title=Stereo ${audio_stream[\u0027Language\u0027]}\u0060)\n\t\t\t}\n\t\t}\n\t\t\n\t\tLogger.ILog(audio_filter)\n\t\tlet output = Flow.TempPath \u002B \u0027/\u0027 \u002B Flow.NewGuid() \u002B \u0027.mkv\u0027;\n\t\tlet ffmpeg = Flow.GetToolPath(\u0027ffmpeg\u0027);\n\t\t\n\t\tlet arguments = [\n\t\t\t\t\u0027-i\u0027,\n\t\t\t\tVariables.file.FullName,\n\t\t\t\t\u0027-map\u0027,\n\t\t\t\t\u0027V\u0027,\n\t\t\t\t\u0027-c\u0027,\n\t\t\t\t\u0027copy\u0027,\n\t\t\t];\n        \n        arguments.push(...audio_filter);\n\t\targuments.push(\u0027-map\u0027, \u00270:s?\u0027, \u0027-map\u0027, \u00270:t?\u0027, \u0027-max_interleave_delta\u0027, \u00270\u0027)\n\t\targuments.push(output);\n\n\t\tLogger.ILog(arguments)\n\n\t\tlet process = Flow.Execute({\n\t\t\tcommand: ffmpeg,\n\t\t\targumentList: arguments\n\t\t});\n\n\t\tif(process.starndardError)\n\t\t\tLogger.ILog(\u0027Standard error: \u0027 \u002B process.starndardError);\n\n\t\tif(process.exitCode !== 0){\n\t\t\tLogger.ELog(\u0027Failed processing ffmpeg: \u0027 \u002B process.exitCode);\n\t\t\treturn -1;\n\t\t}\n\n\t\tFlow.SetWorkingFile(output);\n\t} else {\n\t\tLogger.ILog(\u0027No need to DRC\u0027)\n\t\treturn 2\n\t}\n} else {\n\tLogger.ILog(\u0027No need to DRC\u0027)\n\treturn 2\n}\n\nreturn 1"
       }
-    },
-    {
-      "Uid": "a1e87fe1-6a78-4cbc-ab12-7d42f4bbaaae",
-      "Name": "",
-      "FlowElementUid": "FileFlows.VideoNodes.ReadVideoInfo",
-      "xPos": 450,
-      "yPos": 590,
-      "Icon": "fas fa-video",
-      "Label": "",
-      "Inputs": 1,
-      "Outputs": 2,
-      "OutputConnections": [
-        {
-          "Input": 1,
-          "Output": 1,
-          "InputNode": "40b43ea6-d766-45e3-8e30-99fc21f3180e"
-        }
-      ],
-      "Type": 2,
-      "Model": {}
     },
     {
       "Uid": "2c421c0d-edc9-4a88-9a9e-804ae9204299",
       "Name": "Generate Screenshot",
       "FlowElementUid": "FileFlows.BasicNodes.Functions.Function",
       "xPos": 450,
-      "yPos": 1740,
+      "yPos": 1750,
       "Icon": "fas fa-code",
       "Label": "",
       "Inputs": 1,
@@ -171,7 +151,7 @@
       "Name": "Move to encode folder",
       "FlowElementUid": "FileFlows.BasicNodes.File.MoveFile",
       "xPos": 450,
-      "yPos": 1850,
+      "yPos": 1890,
       "Icon": "fas fa-file-export",
       "Label": "",
       "Inputs": 1,
@@ -193,10 +173,10 @@
     },
     {
       "Uid": "40b43ea6-d766-45e3-8e30-99fc21f3180e",
-      "Name": "Encode Audio",
+      "Name": "Encode Audio to Flac",
       "FlowElementUid": "FileFlows.BasicNodes.Functions.Function",
-      "xPos": 450,
-      "yPos": 700,
+      "xPos": 460,
+      "yPos": 770,
       "Icon": "fas fa-code",
       "Label": "",
       "Inputs": 1,
@@ -210,21 +190,21 @@
         {
           "Input": 1,
           "Output": 2,
-          "InputNode": "770c8778-172b-4aab-be1a-2e9effb50092"
+          "InputNode": "74ce6783-ff5a-48d0-94d3-973c09dde3a2"
         }
       ],
       "Type": 3,
       "Model": {
         "Outputs": 2,
-        "Code": "let audio_encode_codec = \u0027flac\u0027;\nlet audio_encode_list = new Array(\u0022truehd\u0022, \u0022flac\u0022, \u0022dts\u0022);\n\nlet audio_codec_list = new Array();\nif(Variables.vi?.Audio?.Codecs) {\n\taudio_codec_list = Variables.vi?.Audio?.Codecs.toString();\n\taudio_codec_list = audio_codec_list.split(\u0022,\u0022);\n}\n\nlet encode = false;\nlet i = 0;\n\nfor (i=0; i\u003Caudio_encode_list.length; i\u002B\u002B) {\n\tif (audio_codec_list.includes(audio_encode_list[i])) {\n\t\tencode = true;\n\t\tbreak;\n\t}\n}\n\nif (encode) {\n\tlet audio_streams = Variables.vi?.VideoInfo?.AudioStreams;\n\tlet audio_filter = new Array(\u0027-c:a\u0027, \u0027copy\u0027);\n\n\tfor (i=0; i\u003Caudio_streams.length; i\u002B\u002B) {\n\t\tlet codec_found = false;\n\t\t\n\t\tfor (let j=0; j\u003Caudio_encode_list.length; j\u002B\u002B) {\n        \tif (audio_streams[i].Codec == audio_encode_list[j]) {\n\t\t\t\tcodec_found = true;\n\t\t\t\taudio_filter.push(\u0027-map\u0027, audio_streams[i][\u0027IndexString\u0027], \u0060-c:a:${i}\u0060, audio_encode_codec);\n\t\t\t\tbreak;\n\t\t\t}\n\t\t}\n\t\t\n\t\tif(codec_found == false) {\n\t\t\taudio_filter.push(\u0027-map\u0027, audio_streams[i][\u0027IndexString\u0027])\n\t\t}\n\t}\n\n\tlet output = Flow.TempPath \u002B \u0027/\u0027 \u002B Flow.NewGuid() \u002B \u0027.mkv\u0027;\n\tlet ffmpeg = Flow.GetToolPath(\u0027ffmpeg\u0027);\n\tlet arguments = new Array(\n\t\t\u0027-i\u0027,\n\t\tVariables.file.FullName,\n\t\t\u0027-map\u0027,\n\t\t\u0027V\u0027,\n\t\t\u0027-c\u0027,\n\t\t\u0027copy\u0027,\n\t\t\u0027-ar\u0027,\n\t\t\u002748000\u0027,\n\t);\n\n    arguments.push(...audio_filter);\n \n\targuments.push(\u0027-map\u0027, \u00270:s?\u0027, \u0027-map\u0027, \u00270:t?\u0027, \u0027-max_interleave_delta\u0027, \u00270\u0027)\n\n\targuments.push(output);\n\n\tLogger.ILog(arguments)\n\tlet process = Flow.Execute({\n\t\tcommand: ffmpeg,\n\t\targumentList: arguments\n\t});\n\n\tif(process.starndardError)\n\t\tLogger.ILog(\u0027Standard error: \u0027 \u002B process.starndardError);\n\n\tif(process.exitCode !== 0){\n\t\tLogger.ELog(\u0027Failed processing ffmpeg: \u0027 \u002B process.exitCode);\n\t\treturn -1;\n\t}\n\n\tFlow.SetWorkingFile(output);\n\treturn 1;\n\n} else {\n\tLogger.ILog(\u0027No need to encode\u0027);\n\treturn 2;\n}"
+        "Code": "let audio_encode_codec = \u0027flac\u0027;\nlet audio_encode_list = new Array(\u0022truehd\u0022,\u0022dts\u0022, \u0022pcm_s16le\u0022);\n\nlet audio_codec_list = new Array();\nif(Variables.vi?.Audio?.Codecs) {\n\taudio_codec_list = Variables.vi?.Audio?.Codecs.toString();\n\taudio_codec_list = audio_codec_list.split(\u0022,\u0022);\n\taudio_codec_list = audio_codec_list.map(str =\u003E str.trim());\n}\n\nlet encode = false;\nlet i = 0;\n\nencode = audio_encode_list.some(codec =\u003E audio_codec_list.includes(codec));\n\nif (encode) {\n\tlet audio_streams = Variables.vi?.VideoInfo?.AudioStreams;\n\tlet audio_filter = new Array(\u0027-c:a\u0027, \u0027copy\u0027);\n\tfor (i=0; i\u003Caudio_streams.length; i\u002B\u002B) {\t\t\n        \tif (audio_encode_list.includes(audio_streams[i].Codec)) {\n\t\t\t\taudio_filter.push(\u0027-map\u0027, audio_streams[i][\u0027IndexString\u0027], \u0060-c:a:${i}\u0060, audio_encode_codec);\n\t\t\t}else {\n\t\t\taudio_filter.push(\u0027-map\u0027, audio_streams[i][\u0027IndexString\u0027])\n\t\t}\n\t}\n\n\tlet output = Flow.TempPath \u002B \u0027/\u0027 \u002B Flow.NewGuid() \u002B \u0027.mkv\u0027;\n\tlet ffmpeg = Flow.GetToolPath(\u0027ffmpeg\u0027);\n\tlet arguments = new Array(\n\t\t\u0027-i\u0027,\n\t\tVariables.file.FullName,\n\t\t\u0027-map\u0027,\n\t\t\u0027V\u0027,\n\t\t\u0027-c\u0027,\n\t\t\u0027copy\u0027,\n\t\t\u0027-ar\u0027,\n\t\t\u002748000\u0027,\n\t);\n\n    arguments.push(...audio_filter);\n \n\targuments.push(\u0027-map\u0027, \u00270:s?\u0027, \u0027-map\u0027, \u00270:t?\u0027, \u0027-max_interleave_delta\u0027, \u00270\u0027)\n\n\targuments.push(output);\n\n\tLogger.ILog(arguments)\n\tlet process = Flow.Execute({\n\t\tcommand: ffmpeg,\n\t\targumentList: arguments\n\t});\n\n\tif(process.starndardError)\n\t\tLogger.ILog(\u0027Standard error: \u0027 \u002B process.starndardError);\n\n\tif(process.exitCode !== 0){\n\t\tLogger.ELog(\u0027Failed processing ffmpeg: \u0027 \u002B process.exitCode);\n\t\treturn -1;\n\t}\n\n\tFlow.SetWorkingFile(output);\n\treturn 1;\n\n} else {\n\tLogger.ILog(\u0027No need to encode\u0027);\n\treturn 2;\n}"
       }
     },
     {
       "Uid": "770c8778-172b-4aab-be1a-2e9effb50092",
       "Name": "",
       "FlowElementUid": "FileFlows.VideoNodes.ReadVideoInfo",
-      "xPos": 450,
-      "yPos": 830,
+      "xPos": 350,
+      "yPos": 900,
       "Icon": "fas fa-video",
       "Label": "",
       "Inputs": 1,
@@ -253,12 +233,12 @@
         {
           "Input": 1,
           "Output": 1,
-          "InputNode": "498b4d2f-f0ff-4713-b302-f794db944ae5"
+          "InputNode": "291820e9-89a1-4d9d-b97f-9277755fe8b5"
         },
         {
           "Input": 1,
           "Output": 2,
-          "InputNode": "45332e87-37cb-40b0-821f-daf5ca2598ae"
+          "InputNode": "291820e9-89a1-4d9d-b97f-9277755fe8b5"
         }
       ],
       "Type": 6,
@@ -295,8 +275,8 @@
       "Uid": "498b4d2f-f0ff-4713-b302-f794db944ae5",
       "Name": "FFMPEG Builder: Executor",
       "FlowElementUid": "FileFlows.VideoNodes.FfmpegBuilderNodes.FfmpegBuilderExecutor",
-      "xPos": 350,
-      "yPos": 330,
+      "xPos": 450,
+      "yPos": 430,
       "Icon": "far fa-file-video",
       "Label": "",
       "Inputs": 1,
@@ -323,7 +303,7 @@
       "Name": "FFMPEG Builder: Start",
       "FlowElementUid": "FileFlows.VideoNodes.FfmpegBuilderNodes.FfmpegBuilderStart",
       "xPos": 450,
-      "yPos": 950,
+      "yPos": 1010,
       "Icon": "far fa-file-video",
       "Label": "",
       "Inputs": 1,
@@ -343,7 +323,7 @@
       "Name": "Normalize audio",
       "FlowElementUid": "FileFlows.VideoNodes.FfmpegBuilderNodes.FfmpegBuilderAudioNormalization",
       "xPos": 450,
-      "yPos": 1050,
+      "yPos": 1110,
       "Icon": "fas fa-volume-up",
       "Label": "",
       "Inputs": 1,
@@ -357,7 +337,7 @@
         {
           "Input": 1,
           "Output": 2,
-          "InputNode": "be9234fe-6b2e-45d4-ba26-6140a410baf7"
+          "InputNode": "6a589e9c-11d3-4d0e-9e4a-fbf746cf2a02"
         }
       ],
       "Type": 6,
@@ -372,8 +352,8 @@
       "Uid": "6a589e9c-11d3-4d0e-9e4a-fbf746cf2a02",
       "Name": "FFMPEG Builder: Executor",
       "FlowElementUid": "FileFlows.VideoNodes.FfmpegBuilderNodes.FfmpegBuilderExecutor",
-      "xPos": 340,
-      "yPos": 1210,
+      "xPos": 450,
+      "yPos": 1240,
       "Icon": "far fa-file-video",
       "Label": "",
       "Inputs": 1,
@@ -394,11 +374,64 @@
       "Model": {
         "HardwareDecoding": true
       }
+    },
+    {
+      "Uid": "a1e87fe1-6a78-4cbc-ab12-7d42f4bbaaae",
+      "Name": "",
+      "FlowElementUid": "FileFlows.VideoNodes.ReadVideoInfo",
+      "xPos": 360,
+      "yPos": 660,
+      "Icon": "fas fa-video",
+      "Label": "",
+      "Inputs": 1,
+      "Outputs": 2,
+      "OutputConnections": [
+        {
+          "Input": 1,
+          "Output": 1,
+          "InputNode": "40b43ea6-d766-45e3-8e30-99fc21f3180e"
+        }
+      ],
+      "Type": 2,
+      "Model": {}
+    },
+    {
+      "Uid": "291820e9-89a1-4d9d-b97f-9277755fe8b5",
+      "Name": "Remove Cover",
+      "FlowElementUid": "FileFlows.VideoNodes.FfmpegBuilderNodes.FfmpegBuilderAudioTrackRemover",
+      "xPos": 450,
+      "yPos": 330,
+      "Icon": "fas fa-eraser",
+      "Label": "",
+      "Inputs": 1,
+      "Outputs": 2,
+      "OutputConnections": [
+        {
+          "Input": 1,
+          "Output": 1,
+          "InputNode": "498b4d2f-f0ff-4713-b302-f794db944ae5"
+        },
+        {
+          "Input": 1,
+          "Output": 2,
+          "InputNode": "498b4d2f-f0ff-4713-b302-f794db944ae5"
+        }
+      ],
+      "Type": 6,
+      "Model": {
+        "StreamType": "Video",
+        "RemoveAll": false,
+        "RemoveIndex": 0,
+        "Pattern": "mjpeg",
+        "NotMatching": false,
+        "UseLanguageCode": false,
+        "MatchType": 3
+      }
     }
   ],
   "Default": false,
   "Uid": "2f002c50-48f0-4d8c-9bb9-73e988f55b07",
   "Name": "Audio Processing Remux",
-  "DateCreated": "2022-08-18T01:27:23.0179674-06:00",
-  "DateModified": "2022-08-23T22:43:15.0218931-06:00"
+  "DateCreated": "2022-08-17T13:27:23.0179674Z",
+  "DateModified": "2023-01-06T03:16:11.305183-07:00"
 }
