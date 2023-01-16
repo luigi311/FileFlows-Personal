@@ -43,7 +43,7 @@
       ],
       "Type": 3,
       "Model": {
-        "LogType": 0,
+        "LogType": 2,
         "Message": "Already x265 so probably already encoded"
       }
     },
@@ -67,7 +67,7 @@
       "Type": 3,
       "Model": {
         "Outputs": 1,
-        "Code": "let encoder = \u0027x265\u0027\nlet avaliable_threads = 28\nlet encoding_threads = 4\nlet workers = Math.max(Math.floor(avaliable_threads / encoding_threads) - 1, 1)\n\nlet encoding_parameters = \u0060-p slower --crf 25 -D 10 -F ${encoding_threads} --pools ${encoding_threads} --no-sao --no-strong-intra-smoothing --bframes 8 --psy-rd 2 --psy-rdoq 1 --aq-mode 3 --ref 6 --deblock -1,-1 --no-rect --me 0 --no-b-intra --qcomp 0.5 --qg-size 8 --no-pmode --pme --wpp --scenecut 80 --max-tu-size 8 --b-pyramid\u0060\nlet target_quality = \u002797\u0027\n\nlet base_folder = Flow.TempPath \u002B \u0027/\u0027 \u002B Flow.NewGuid()\nlet temp_folder = base_folder \u002B \u0027/\u0027 \u002B Variables.file.Orig.FileName.toString().replace(/[^a-z0-9]/gi, \u0027_\u0027).toLowerCase();\nlet output = base_folder \u002B \u0027.mkv\u0027;\nlet av1an = Flow.GetToolPath(\u0027av1an\u0027);\nlet process = Flow.Execute({\n\tcommand: av1an,\n\targumentList: [\n\t\t\u0027-i\u0027,\n\t\tVariables.file.FullName,\n\t\t\u0027-y\u0027,\n\t\t\u0027-e\u0027,\n\t\tencoder,\n\t\t\u0027-v\u0027,\n\t\tencoding_parameters,\n        \u0027--probe-slow\u0027,\n\t\t\u0027--chunk-method\u0027,\n\t\t\u0027lsmash\u0027,\n\t\t\u0027--target-quality\u0027,\n\t\ttarget_quality,\n\t\t\u0027--concat\u0027,\n\t\t\u0027mkvmerge\u0027,\n\t\t\u0027--vmaf\u0027,\n\t\t\u0027--vmaf-threads\u0027,\n        \u00274\u0027,\n\t\t\u0027--workers\u0027,\n\t\t\u0060${workers}\u0060,\n\t\t\u0027--temp\u0027,\n\t\ttemp_folder ,\n\t\t\u0027-o\u0027,\n\t\t\u0060${output}\u0060\n\t]\n});\n\nif(process.standardOutput)\n\tLogger.ILog(\u0027Standard output: \u0027 \u002B process.standardOutput);\nif(process.starndardError)\n\tLogger.ILog(\u0027Standard error: \u0027 \u002B process.starndardError);\n\nif(process.exitCode !== 0){\n\tLogger.ELog(\u0027Failed processing av1an: \u0027 \u002B process.exitCode);\n\treturn -1;\n}\n\nFlow.SetWorkingFile(output);\nreturn 1;"
+        "Code": "let encoder = \u0027x265\u0027\nlet avaliable_threads = 28\n\nlet threads_12 = new Array(\u0022docker0\u0022, \u0022docker1\u0022, \u0022docker2\u0022);\n\nif (System.Environment.MachineName == \u0022luigi311-desktop\u0022) {\n\tavaliable_threads = 32\n} else if (threads_12.includes(System.Environment.MachineName)) {\n\tavaliable_threads = 12\n}\n\nLogger.ILog(System.Environment.MachineName, avaliable_threads)\n\nlet encoding_threads = 4\nlet workers = Math.max(Math.floor(avaliable_threads / encoding_threads) - 1, 1)\n\nlet encoding_parameters = \u0060-p slower --crf 25 -D 10 -F ${encoding_threads} --pools ${encoding_threads} --no-sao --no-strong-intra-smoothing --bframes 8 --psy-rd 2 --psy-rdoq 1 --aq-mode 3 --ref 6 --deblock -1,-1 --no-rect --me 0 --no-b-intra --qcomp 0.5 --qg-size 8 --no-pmode --pme --wpp --scenecut 80 --max-tu-size 8 --b-pyramid\u0060\nlet target_quality = \u002797\u0027\n\nlet base_folder = Flow.TempPath \u002B \u0027/\u0027 \u002B Flow.NewGuid()\nlet temp_folder = base_folder \u002B \u0027/\u0027 \u002B Variables.file.Orig.FileName.toString().replace(/[^a-z0-9]/gi, \u0027_\u0027).toLowerCase();\nlet output = base_folder \u002B \u0027.mkv\u0027;\nlet av1an = Flow.GetToolPath(\u0027av1an\u0027);\nlet process = Flow.Execute({\n\tcommand: av1an,\n\targumentList: [\n\t\t\u0027-i\u0027,\n\t\tVariables.file.FullName,\n\t\t\u0027-y\u0027,\n\t\t\u0027-e\u0027,\n\t\tencoder,\n\t\t\u0027-v\u0027,\n\t\tencoding_parameters,\n        \u0027--probe-slow\u0027,\n\t\t\u0027--chunk-method\u0027,\n\t\t\u0027lsmash\u0027,\n\t\t\u0027--target-quality\u0027,\n\t\ttarget_quality,\n\t\t\u0027--concat\u0027,\n\t\t\u0027mkvmerge\u0027,\n\t\t\u0027--vmaf\u0027,\n\t\t\u0027--vmaf-threads\u0027,\n        \u00274\u0027,\n\t\t\u0027--workers\u0027,\n\t\t\u0060${workers}\u0060,\n\t\t\u0027--temp\u0027,\n\t\ttemp_folder ,\n\t\t\u0027-o\u0027,\n\t\t\u0060${output}\u0060\n\t]\n});\n\nif(process.standardOutput)\n\tLogger.ILog(\u0027Standard output: \u0027 \u002B process.standardOutput);\nif(process.starndardError)\n\tLogger.ILog(\u0027Standard error: \u0027 \u002B process.starndardError);\n\nif(process.exitCode !== 0){\n\tLogger.ELog(\u0027Failed processing av1an: \u0027 \u002B process.exitCode);\n\treturn -1;\n}\n\nFlow.SetWorkingFile(output);\nreturn 1;"
       }
     },
     {
@@ -219,6 +219,6 @@
   "Default": false,
   "Uid": "e8797247-b170-451c-9071-ae875b794f69",
   "Name": "Video",
-  "DateCreated": "2022-08-18T01:27:16.5600968-06:00",
-  "DateModified": "2022-09-01T19:14:34.3278954-06:00"
+  "DateCreated": "2022-08-17T13:27:16.5600968Z",
+  "DateModified": "2023-01-16T01:26:29.8159296-07:00"
 }
