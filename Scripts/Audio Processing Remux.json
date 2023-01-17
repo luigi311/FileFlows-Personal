@@ -151,12 +151,18 @@
       "Name": "Move to encode folder",
       "FlowElementUid": "FileFlows.BasicNodes.File.MoveFile",
       "xPos": 450,
-      "yPos": 1750,
+      "yPos": 1860,
       "Icon": "fas fa-file-export",
       "Label": "",
       "Inputs": 1,
       "Outputs": 1,
-      "OutputConnections": null,
+      "OutputConnections": [
+        {
+          "Input": 1,
+          "Output": 1,
+          "InputNode": "74047f3f-6e42-4f35-9866-c552f827c78f"
+        }
+      ],
       "Type": 2,
       "Model": {
         "DestinationPath": "/media/Seed/Encoded",
@@ -427,11 +433,71 @@
         "UseLanguageCode": false,
         "MatchType": 3
       }
+    },
+    {
+      "Uid": "74047f3f-6e42-4f35-9866-c552f827c78f",
+      "Name": "",
+      "FlowElementUid": "FileFlows.BasicNodes.File.OriginalFile",
+      "xPos": 450,
+      "yPos": 1990,
+      "Icon": "fas fa-file",
+      "Label": "Original File",
+      "Inputs": 1,
+      "Outputs": 1,
+      "OutputConnections": [
+        {
+          "Input": 1,
+          "Output": 1,
+          "InputNode": "3e5214a8-0dfd-4ab9-ab71-47a1b626e70c"
+        }
+      ],
+      "Type": 3,
+      "Model": {}
+    },
+    {
+      "Uid": "3e5214a8-0dfd-4ab9-ab71-47a1b626e70c",
+      "Name": "If Encode Video",
+      "FlowElementUid": "FileFlows.BasicNodes.Functions.Function",
+      "xPos": 450,
+      "yPos": 2110,
+      "Icon": "fas fa-code",
+      "Label": "Function",
+      "Inputs": 1,
+      "Outputs": 2,
+      "OutputConnections": [
+        {
+          "Input": 1,
+          "Output": 1,
+          "InputNode": "c9d4a11b-56c4-4a4a-b3df-e5c7d532f00c"
+        }
+      ],
+      "Type": 3,
+      "Model": {
+        "Outputs": 2,
+        "Code": "// Custom javascript code that you can run against the flow file.\n// Flow contains helper functions for the Flow.\n// Variables contain variables available to this node from previous nodes.\n// Logger lets you log messages to the flow output.\n\n// return 0 to complete the flow.\n// return -1 to signal an error in the flow\n// return 1\u002B to select which output node will be processed next\n\nif(Variables.file.Size === 0)\n\treturn -1;\n\n\nif(Variables.folder.FullName.includes(\u0022Encode Video\u0022))\n\treturn 1;\n\n\nreturn 2"
+      }
+    },
+    {
+      "Uid": "c9d4a11b-56c4-4a4a-b3df-e5c7d532f00c",
+      "Name": "Deleting!",
+      "FlowElementUid": "FileFlows.BasicNodes.Functions.Log",
+      "xPos": 420,
+      "yPos": 2220,
+      "Icon": "far fa-file-alt",
+      "Label": "Log",
+      "Inputs": 1,
+      "Outputs": 1,
+      "OutputConnections": null,
+      "Type": 3,
+      "Model": {
+        "LogType": 1,
+        "Message": "Deleting File!"
+      }
     }
   ],
   "Default": false,
   "Uid": "2f002c50-48f0-4d8c-9bb9-73e988f55b07",
   "Name": "Audio Processing Remux",
-  "DateCreated": "2022-08-17T01:27:23.0179674Z",
-  "DateModified": "2023-01-16T01:10:53.8870713-07:00"
+  "DateCreated": "2022-08-16T19:27:23.0179674Z",
+  "DateModified": "2023-01-16T10:11:13.4650223Z"
 }

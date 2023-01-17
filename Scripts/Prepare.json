@@ -1,0 +1,252 @@
+{
+  "Enabled": true,
+  "Description": "A blank Video template with a single \u0022Video File\u0022 input node.",
+  "Type": 0,
+  "Template": "Video File",
+  "Parts": [
+    {
+      "Uid": "ca728328-4a76-4dcc-baca-b433837982ff",
+      "Name": "",
+      "FlowElementUid": "FileFlows.VideoNodes.VideoFile",
+      "xPos": 450,
+      "yPos": 50,
+      "Icon": "fas fa-video",
+      "Label": null,
+      "Inputs": 0,
+      "Outputs": 1,
+      "OutputConnections": [
+        {
+          "Input": 1,
+          "Output": 1,
+          "InputNode": "213fe40c-fc7c-4100-aaee-c7c756e754a0"
+        }
+      ],
+      "Type": 0,
+      "Model": null
+    },
+    {
+      "Uid": "213fe40c-fc7c-4100-aaee-c7c756e754a0",
+      "Name": "Has x265",
+      "FlowElementUid": "FileFlows.VideoNodes.VideoHasStream",
+      "xPos": 450,
+      "yPos": 210,
+      "Icon": "fas fa-video",
+      "Label": "",
+      "Inputs": 1,
+      "Outputs": 2,
+      "OutputConnections": [
+        {
+          "Input": 1,
+          "Output": 2,
+          "InputNode": "2ec1cd54-cd13-4044-8f4f-0eadd718893b"
+        },
+        {
+          "Input": 1,
+          "Output": 1,
+          "InputNode": "81de039f-1c5e-47b5-b738-556e7f4ecfb9"
+        }
+      ],
+      "Type": 3,
+      "Model": {
+        "Stream": "Video",
+        "Title": null,
+        "Codec": "h265|hevc",
+        "Language": null,
+        "Channels": 0
+      }
+    },
+    {
+      "Uid": "81de039f-1c5e-47b5-b738-556e7f4ecfb9",
+      "Name": "Already x265",
+      "FlowElementUid": "FileFlows.BasicNodes.Functions.Log",
+      "xPos": 240,
+      "yPos": 420,
+      "Icon": "far fa-file-alt",
+      "Label": "",
+      "Inputs": 1,
+      "Outputs": 1,
+      "OutputConnections": [
+        {
+          "Input": 1,
+          "Output": 1,
+          "InputNode": "3ef70e26-97f4-4f3d-bcce-2d1fb6874548"
+        }
+      ],
+      "Type": 3,
+      "Model": {
+        "LogType": 2,
+        "Message": "Already x265 so probably already encoded"
+      }
+    },
+    {
+      "Uid": "3ef70e26-97f4-4f3d-bcce-2d1fb6874548",
+      "Name": "0 \u003C X \u003C 10GB",
+      "FlowElementUid": "FileFlows.BasicNodes.File.FileSize",
+      "xPos": 240,
+      "yPos": 570,
+      "Icon": "fas fa-balance-scale-right",
+      "Label": "",
+      "Inputs": 1,
+      "Outputs": 2,
+      "OutputConnections": [
+        {
+          "Input": 1,
+          "Output": 2,
+          "InputNode": "2ec1cd54-cd13-4044-8f4f-0eadd718893b"
+        },
+        {
+          "Input": 1,
+          "Output": 1,
+          "InputNode": "882e09e6-71cb-404a-85b1-b8b979570729"
+        }
+      ],
+      "Type": 3,
+      "Model": {
+        "Lower": 0,
+        "Upper": 10240
+      }
+    },
+    {
+      "Uid": "2ec1cd54-cd13-4044-8f4f-0eadd718893b",
+      "Name": "prepare",
+      "FlowElementUid": "FileFlows.BasicNodes.Functions.Function",
+      "xPos": 480,
+      "yPos": 790,
+      "Icon": "fas fa-code",
+      "Label": "",
+      "Inputs": 1,
+      "Outputs": 1,
+      "OutputConnections": [
+        {
+          "Input": 1,
+          "Output": 1,
+          "InputNode": "b1440a80-62aa-4409-badb-5970e23290a2"
+        }
+      ],
+      "Type": 3,
+      "Model": {
+        "Outputs": 1,
+        "Code": "let output = Flow.TempPath \u002B \u0027/\u0027 \u002B Flow.NewGuid() \u002B \u0027.mkv\u0027;\nlet ffmpeg = Flow.GetToolPath(\u0027ffmpeg\u0027);\n\nlet arguements = [\n\t\u0027-i\u0027,\n\tVariables.file.FullName,\n\t\u0027-map\u0027,\n\t\u00270\u0027,\n\t\u0027-max_interleave_delta\u0027,\n\t\u00270\u0027,\n\t\u0027-c\u0027,\n\t\u0027copy\u0027,\n\t\u0027-c:v\u0027,\n\t\u0027libx264\u0027,\n\t\u0027-crf\u0027,\n\t\u00270\u0027,\n\t\u0027-preset\u0027,\n\t\u0027ultrafast\u0027,\n\toutput\n];\n\nlet process = Flow.Execute({\n\tcommand: ffmpeg,\n\targumentList: arguements\n});\n\nif(process.starndardError)\n\tLogger.ILog(\u0027Standard error: \u0027 \u002B process.starndardError);\n\nif(process.exitCode !== 0){\n\tLogger.ELog(\u0027Failed processing ffmpeg: \u0027 \u002B process.exitCode);\n\treturn -1;\n}\n\nFlow.SetWorkingFile(output);\nreturn 1;"
+      }
+    },
+    {
+      "Uid": "882e09e6-71cb-404a-85b1-b8b979570729",
+      "Name": "Smaller than 10 GB",
+      "FlowElementUid": "FileFlows.BasicNodes.Functions.Log",
+      "xPos": 210,
+      "yPos": 790,
+      "Icon": "far fa-file-alt",
+      "Label": "",
+      "Inputs": 1,
+      "Outputs": 1,
+      "OutputConnections": [
+        {
+          "Input": 1,
+          "Output": 1,
+          "InputNode": "ad339aa6-800b-4819-8362-d6f017cf97c8"
+        }
+      ],
+      "Type": 3,
+      "Model": {
+        "LogType": 2,
+        "Message": "Smaller than 10, Probably not a hevc remux"
+      }
+    },
+    {
+      "Uid": "564db5ac-85ab-46b2-94eb-2b459ea36fa3",
+      "Name": "Move to encode folder",
+      "FlowElementUid": "FileFlows.BasicNodes.File.MoveFile",
+      "xPos": 570,
+      "yPos": 1830,
+      "Icon": "fas fa-file-export",
+      "Label": "",
+      "Inputs": 1,
+      "Outputs": 1,
+      "OutputConnections": null,
+      "Type": 2,
+      "Model": {
+        "DestinationPath": "/media/Seed/Encoded",
+        "DestinationFile": null,
+        "MoveFolder": true,
+        "DeleteOriginal": false,
+        "AdditionalFiles": [
+          "*.jpg",
+          "*.png",
+          "*.svg"
+        ],
+        "AdditionalFilesFromOriginal": false
+      }
+    },
+    {
+      "Uid": "8b5bb8bd-ac45-4682-9f77-4e45d7f6e2dc",
+      "Name": "Move to encode folder",
+      "FlowElementUid": "FileFlows.BasicNodes.File.MoveFile",
+      "xPos": 570,
+      "yPos": 1830,
+      "Icon": "fas fa-file-export",
+      "Label": "",
+      "Inputs": 1,
+      "Outputs": 1,
+      "OutputConnections": null,
+      "Type": 2,
+      "Model": {
+        "DestinationPath": "/media/Seed/Encoded",
+        "DestinationFile": null,
+        "MoveFolder": true,
+        "DeleteOriginal": false,
+        "AdditionalFiles": [
+          "*.jpg",
+          "*.png",
+          "*.svg"
+        ],
+        "AdditionalFilesFromOriginal": false
+      }
+    },
+    {
+      "Uid": "ad339aa6-800b-4819-8362-d6f017cf97c8",
+      "Name": "Audio Processing",
+      "FlowElementUid": "FileFlows.BasicNodes.Functions.GotoFlow",
+      "xPos": 210,
+      "yPos": 980,
+      "Icon": "fas fa-sitemap",
+      "Label": "",
+      "Inputs": 1,
+      "Outputs": 0,
+      "OutputConnections": null,
+      "Type": 3,
+      "Model": {
+        "Flow": {
+          "name": "Audio Processing Remux",
+          "uid": "2f002c50-48f0-4d8c-9bb9-73e988f55b07",
+          "type": "FileFlows.Shared.Models.Flow"
+        }
+      }
+    },
+    {
+      "Uid": "b1440a80-62aa-4409-badb-5970e23290a2",
+      "Name": "Move to Encode Video",
+      "FlowElementUid": "FileFlows.BasicNodes.File.MoveFile",
+      "xPos": 480,
+      "yPos": 970,
+      "Icon": "fas fa-file-export",
+      "Label": "Move File",
+      "Inputs": 1,
+      "Outputs": 2,
+      "OutputConnections": null,
+      "Type": 2,
+      "Model": {
+        "DestinationPath": "/media/Seed/Encode Video",
+        "DestinationFile": null,
+        "MoveFolder": true,
+        "DeleteOriginal": false,
+        "AdditionalFiles": null,
+        "AdditionalFilesFromOriginal": false
+      }
+    }
+  ],
+  "Default": false,
+  "Uid": "94e054db-7fda-4de0-8e79-8b50ffb101ca",
+  "Name": "Prepare",
+  "DateCreated": "2023-01-16T09:36:41.7720858Z",
+  "DateModified": "2023-01-16T09:36:41.7720858Z"
+}
