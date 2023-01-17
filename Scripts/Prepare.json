@@ -11,7 +11,7 @@
       "xPos": 450,
       "yPos": 50,
       "Icon": "fas fa-video",
-      "Label": null,
+      "Label": "",
       "Inputs": 0,
       "Outputs": 1,
       "OutputConnections": [
@@ -157,7 +157,7 @@
       "Name": "Move to encode folder",
       "FlowElementUid": "FileFlows.BasicNodes.File.MoveFile",
       "xPos": 570,
-      "yPos": 1830,
+      "yPos": 1750,
       "Icon": "fas fa-file-export",
       "Label": "",
       "Inputs": 1,
@@ -182,7 +182,7 @@
       "Name": "Move to encode folder",
       "FlowElementUid": "FileFlows.BasicNodes.File.MoveFile",
       "xPos": 570,
-      "yPos": 1830,
+      "yPos": 1750,
       "Icon": "fas fa-file-export",
       "Label": "",
       "Inputs": 1,
@@ -229,10 +229,21 @@
       "xPos": 480,
       "yPos": 970,
       "Icon": "fas fa-file-export",
-      "Label": "Move File",
+      "Label": "",
       "Inputs": 1,
       "Outputs": 2,
-      "OutputConnections": null,
+      "OutputConnections": [
+        {
+          "Input": 1,
+          "Output": 1,
+          "InputNode": "6325bf82-7b46-41e5-9333-2e3a4f88a5a9"
+        },
+        {
+          "Input": 1,
+          "Output": 2,
+          "InputNode": "6325bf82-7b46-41e5-9333-2e3a4f88a5a9"
+        }
+      ],
       "Type": 2,
       "Model": {
         "DestinationPath": "/media/Seed/Encode Video",
@@ -242,11 +253,48 @@
         "AdditionalFiles": null,
         "AdditionalFilesFromOriginal": false
       }
+    },
+    {
+      "Uid": "83a5be1b-b58b-4b0c-90ad-3c6a870115d7",
+      "Name": "",
+      "FlowElementUid": "FileFlows.BasicNodes.File.OriginalFile",
+      "xPos": 480,
+      "yPos": 1200,
+      "Icon": "fas fa-file",
+      "Label": "",
+      "Inputs": 1,
+      "Outputs": 1,
+      "OutputConnections": null,
+      "Type": 3,
+      "Model": {}
+    },
+    {
+      "Uid": "6325bf82-7b46-41e5-9333-2e3a4f88a5a9",
+      "Name": "Reset Working File",
+      "FlowElementUid": "FileFlows.BasicNodes.Functions.Log",
+      "xPos": 480,
+      "yPos": 1080,
+      "Icon": "far fa-file-alt",
+      "Label": "",
+      "Inputs": 1,
+      "Outputs": 1,
+      "OutputConnections": [
+        {
+          "Input": 1,
+          "Output": 1,
+          "InputNode": "83a5be1b-b58b-4b0c-90ad-3c6a870115d7"
+        }
+      ],
+      "Type": 3,
+      "Model": {
+        "LogType": 2,
+        "Message": "Reset working file so FileFlows reads in the new file from the new library"
+      }
     }
   ],
   "Default": false,
   "Uid": "94e054db-7fda-4de0-8e79-8b50ffb101ca",
   "Name": "Prepare",
   "DateCreated": "2023-01-16T09:36:41.7720858Z",
-  "DateModified": "2023-01-16T09:36:41.7720858Z"
+  "DateModified": "2023-01-16T22:01:18.4797453-07:00"
 }
