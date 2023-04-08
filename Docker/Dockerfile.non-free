@@ -1,14 +1,11 @@
 FROM ghcr.io/luigi311/encoder-docker-base-image:latest
 
+WORKDIR /app
+
 # copy the deploy file into the app directory
 RUN wget -O FileFlows.zip https://fileflows.com/downloads/zip && \
     unzip FileFlows.zip && \
-    rm FileFlows.zip && \
-    mkdir /app && \
-    mv * /app
-
-# set the working directory
-WORKDIR /app
+    rm FileFlows.zip 
 
 COPY ./docker-entrypoint.sh /app/
 
