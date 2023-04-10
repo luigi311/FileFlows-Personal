@@ -45,18 +45,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
-
-      - name: Cache Docker layers
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-
-      
-      - name: Clear cache on scheduled run
-        if: ${{ github.event_name == 'schedule' }}
-        run: rm -rf /tmp/.buildx-cache
       
       - name: Build
         if: steps.docker_meta.outcome == 'skipped'
@@ -67,8 +55,6 @@ jobs:
           file: Docker/Dockerfile.non-free
           push: false
           tags: fileflows:action
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
       - name: Build and push
         id: docker_build
@@ -81,13 +67,6 @@ jobs:
           push: true
           tags: ${{ steps.docker_meta.outputs.tags }}
           labels: ${{ steps.docker_meta.outputs.labels }}
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
-
-      - name: Move cache
-        run: |
-          rm -rf /tmp/.buildx-cache
-          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
       - name: Image digest
         if: steps.docker_meta.outcome == 'success'
