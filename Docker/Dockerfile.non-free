@@ -6,7 +6,7 @@ USER $BUILD_USER
 WORKDIR /home/$BUILD_USER
 
 # Install dotnet
-RUN yes | yay -Sy --noconfirm dotnet-runtime-7.0-bin aspnet-runtime-7.0-bin && \
+RUN yes | yay -Sy --noconfirm dotnet-runtime-bin aspnet-runtime-bin && \
     yes | yay -Scc
 
 USER root
