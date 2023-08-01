@@ -5,9 +5,6 @@ on:
     paths:
       - 'Docker/**'
       - '.github/workflows/*'
-      
-  schedule:
-    - cron: '0 0 * * 0'
 
 jobs:
   docker:
