@@ -1,5 +1,15 @@
 FROM ghcr.io/luigi311/encoder-docker-base-image:latest
 
+ENV BUILD_USER=makepkg
+
+USER $BUILD_USER
+WORKDIR /home/$BUILD_USER
+
+# Install dotnet
+RUN yes | yay -Sy --noconfirm dotnet-runtime-7.0-bin aspnet-runtime-7.0-bin && \
+    yes | yay -Scc
+
+USER root
 WORKDIR /app
 
 # copy the deploy file into the app directory
