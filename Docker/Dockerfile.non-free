@@ -1,14 +1,5 @@
 FROM ghcr.io/luigi311/encoder-docker-base-image:latest
 
-ENV BUILD_USER=makepkg
-
-USER $BUILD_USER
-WORKDIR /home/$BUILD_USER
-
-# Install dotnet
-RUN yes | yay -S --noconfirm dotnet-runtime-bin aspnet-runtime-bin && \
-    yes | yay -Scc
-
 USER root
 WORKDIR /app
 
