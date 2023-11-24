@@ -1,6 +1,6 @@
 {
   "Enabled": true,
-  "Description": "A blank Video template with a single \u0022Video File\u0022 input node.",
+  "Revision": 0,
   "Type": 0,
   "Template": "Video File",
   "Parts": [
@@ -153,56 +153,6 @@
       }
     },
     {
-      "Uid": "564db5ac-85ab-46b2-94eb-2b459ea36fa3",
-      "Name": "Move to encode folder",
-      "FlowElementUid": "FileFlows.BasicNodes.File.MoveFile",
-      "xPos": 570,
-      "yPos": 1750,
-      "Icon": "fas fa-file-export",
-      "Label": "",
-      "Inputs": 1,
-      "Outputs": 1,
-      "OutputConnections": null,
-      "Type": 2,
-      "Model": {
-        "DestinationPath": "/media/Seed/Encoded",
-        "DestinationFile": null,
-        "MoveFolder": true,
-        "DeleteOriginal": false,
-        "AdditionalFiles": [
-          "*.jpg",
-          "*.png",
-          "*.svg"
-        ],
-        "AdditionalFilesFromOriginal": false
-      }
-    },
-    {
-      "Uid": "8b5bb8bd-ac45-4682-9f77-4e45d7f6e2dc",
-      "Name": "Move to encode folder",
-      "FlowElementUid": "FileFlows.BasicNodes.File.MoveFile",
-      "xPos": 570,
-      "yPos": 1750,
-      "Icon": "fas fa-file-export",
-      "Label": "",
-      "Inputs": 1,
-      "Outputs": 1,
-      "OutputConnections": null,
-      "Type": 2,
-      "Model": {
-        "DestinationPath": "/media/Seed/Encoded",
-        "DestinationFile": null,
-        "MoveFolder": true,
-        "DeleteOriginal": false,
-        "AdditionalFiles": [
-          "*.jpg",
-          "*.png",
-          "*.svg"
-        ],
-        "AdditionalFilesFromOriginal": false
-      }
-    },
-    {
       "Uid": "ad339aa6-800b-4819-8362-d6f017cf97c8",
       "Name": "Audio Processing",
       "FlowElementUid": "FileFlows.BasicNodes.Functions.GotoFlow",
@@ -227,7 +177,7 @@
       "Name": "Move to Encode Video",
       "FlowElementUid": "FileFlows.BasicNodes.File.MoveFile",
       "xPos": 480,
-      "yPos": 970,
+      "yPos": 980,
       "Icon": "fas fa-file-export",
       "Label": "",
       "Inputs": 1,
@@ -236,12 +186,12 @@
         {
           "Input": 1,
           "Output": 1,
-          "InputNode": "6325bf82-7b46-41e5-9333-2e3a4f88a5a9"
+          "InputNode": "c7113e52-c2d6-4ad8-8984-3595fbd2307a"
         },
         {
           "Input": 1,
           "Output": 2,
-          "InputNode": "6325bf82-7b46-41e5-9333-2e3a4f88a5a9"
+          "InputNode": "c7113e52-c2d6-4ad8-8984-3595fbd2307a"
         }
       ],
       "Type": 2,
@@ -255,11 +205,11 @@
       }
     },
     {
-      "Uid": "83a5be1b-b58b-4b0c-90ad-3c6a870115d7",
+      "Uid": "9b9af34f-966a-4bd7-bd21-7b5df04ecc51",
       "Name": "",
       "FlowElementUid": "FileFlows.BasicNodes.File.OriginalFile",
       "xPos": 480,
-      "yPos": 1200,
+      "yPos": 1270,
       "Icon": "fas fa-file",
       "Label": "",
       "Inputs": 1,
@@ -269,32 +219,40 @@
       "Model": {}
     },
     {
-      "Uid": "6325bf82-7b46-41e5-9333-2e3a4f88a5a9",
-      "Name": "Reset Working File",
+      "Uid": "c7113e52-c2d6-4ad8-8984-3595fbd2307a",
+      "Name": "Add use original to fix discovery issues",
       "FlowElementUid": "FileFlows.BasicNodes.Functions.Log",
       "xPos": 480,
-      "yPos": 1080,
+      "yPos": 1120,
       "Icon": "far fa-file-alt",
-      "Label": "",
+      "Label": "Log",
       "Inputs": 1,
       "Outputs": 1,
       "OutputConnections": [
         {
           "Input": 1,
           "Output": 1,
-          "InputNode": "83a5be1b-b58b-4b0c-90ad-3c6a870115d7"
+          "InputNode": "9b9af34f-966a-4bd7-bd21-7b5df04ecc51"
         }
       ],
       "Type": 3,
       "Model": {
         "LogType": 2,
-        "Message": "Reset working file so FileFlows reads in the new file from the new library"
+        "Message": "Add use original to fix discovery issues"
       }
     }
   ],
   "Default": false,
+  "Properties": {
+    "Description": null,
+    "Author": null,
+    "MinimumVersion": null,
+    "Tags": null,
+    "Fields": [],
+    "Variables": {}
+  },
   "Uid": "94e054db-7fda-4de0-8e79-8b50ffb101ca",
   "Name": "Prepare",
-  "DateCreated": "2023-01-16T09:36:41.7720858Z",
-  "DateModified": "2023-01-16T22:01:18.4797453-07:00"
+  "DateCreated": "2023-01-15T19:36:42Z",
+  "DateModified": "2023-08-01T14:34:14Z"
 }
