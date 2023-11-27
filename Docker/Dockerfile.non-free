@@ -21,7 +21,7 @@ RUN dos2unix /app/docker-entrypoint.sh && \
 
 # Install other tools
 RUN git clone https://github.com/luigi311/Plot_Vmaf && \
-    pip install -r Plot_Vmaf/requirements.txt && \
+    pip install -r Plot_Vmaf/requirements.txt --break-system-packages && \
     cp Plot_Vmaf/plot_vmaf.py /usr/local/bin/ && \
     rm -rf Plot_Vmaf
 
